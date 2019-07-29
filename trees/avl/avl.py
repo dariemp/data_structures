@@ -25,6 +25,14 @@ class AVL(object):
     def insert(self, key, data):
         self._root = self._search_and_insert(self._root, key, data)
 
+    def in_order(self, accumulator, operator, on_data=False):
+        self._in_order(self._root, accumulator, operator, on_data)
+
+    def retrieve_range(self, accumulator, operator, first_key, last_key, retrieve_data=False):
+        if first_key >= last_key:
+            raise ValueError('First key must be strictly less than last key')
+        return self._retrieve_range(self._root, accumulator, operator, first_key, last_key, retrieve_data)
+
     def _search_and_insert(self, node, key, data):
         if not node:
             return Node(key, data)
@@ -101,17 +109,16 @@ class AVL(object):
   
         return new_root
 
-    def in_order(self, accumulator, operator, on_data=False):
-        self._in_order(self._root, accumulator, operator, on_data)
-        return accumulator
-
     def _in_order(self, node, accumulator, operator, on_data=False):
         if not node:
-            return accumulator
+            return
         self._in_order(node.left_child, accumulator, operator, on_data)
+        self._operate_on_node(node, accumulator, operator, on_data)
+        self._in_order(node.right_child, accumulator, operator, on_data)
+
+    def _operate_on_node(self, node, accumulator, operator, on_data=False):
         value = self._get_value_for_ordering(node, on_data)
         getattr(accumulator, operator)(value)
-        self._in_order(node.right_child, accumulator, operator, on_data)
 
     def _get_value_for_ordering(self, node, on_data=False):
         if on_data:
@@ -119,3 +126,48 @@ class AVL(object):
         else:
             value = node.key
         return value
+
+    def _retrieve_range(self, node, accumulator, operator, first_key, last_key, retrieve_data=False):
+        if not node:
+            return
+        return self._retrieve_range_in_children(node, accumulator, operator, first_key, last_key, retrieve_data)
+
+    def _retrieve_range_in_children(self, node, accumulator, operator, first_key, last_key, retrieve_data=False):
+        if first_key and last_key:
+            self._retrieve_range_both_keys(node, accumulator, operator, first_key, last_key, retrieve_data)
+        elif first_key and not last_key:
+            self._retrieve_range_first_key(node, accumulator, operator, first_key, retrieve_data)
+        elif last_key and not first_key:
+            self._retrieve_range_last_key(node, accumulator, operator, last_key, retrieve_data)
+
+    def _retrieve_range_both_keys(self, node, accumulator, operator, first_key, last_key, retrieve_data=False):
+        if first_key <= node.key <= last_key:
+            self._retrieve_range(node.left_child, accumulator, operator, first_key, None, retrieve_data)
+            self._operate_on_node(node, accumulator, operator, retrieve_data)
+            self._retrieve_range(node.right_child, accumulator, operator, None, last_key, retrieve_data)
+        elif node.key < first_key:
+            self._retrieve_range(node.right_child, accumulator, operator, first_key, last_key, retrieve_data)
+        elif node.key > last_key:
+            self._retrieve_range(node.left_child, accumulator, operator, first_key, last_key, retrieve_data)
+
+    def _retrieve_range_first_key(self, node, accumulator, operator, first_key, retrieve_data=False):
+        if node.key == first_key:
+            self._operate_on_node(node, accumulator, operator, retrieve_data)
+            self._retrieve_range(node.right_child, accumulator, operator, first_key, None, retrieve_data)
+        elif node.key > first_key:
+            self._retrieve_range(node.left_child, accumulator, operator, first_key, None, retrieve_data)
+            self._operate_on_node(node, accumulator, operator, retrieve_data)
+            self._retrieve_range(node.right_child, accumulator, operator, first_key, None, retrieve_data)
+        elif node.key < first_key:
+            self._retrieve_range(node.right_child, accumulator, operator, first_key, None, retrieve_data)
+
+    def _retrieve_range_last_key(self, node, accumulator, operator, last_key, retrieve_data=False):
+        if node.key == last_key:
+            self._retrieve_range(node.left_child, accumulator, operator, None, last_key, retrieve_data)
+            self._operate_on_node(node, accumulator, operator, retrieve_data)
+        elif node.key < last_key:
+            self._retrieve_range(node.left_child, accumulator, operator, None, last_key, retrieve_data)
+            self._operate_on_node(node, accumulator, operator, retrieve_data)
+            self._retrieve_range(node.right_child, accumulator, operator, None, last_key, retrieve_data)
+        elif node.key > last_key:
+            self._retrieve_range(node.left_child, accumulator, operator, None, last_key, retrieve_data)
