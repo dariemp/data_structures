@@ -1,4 +1,3 @@
-from enum import Enum
 from node import Node
 
 class AVL(object):
