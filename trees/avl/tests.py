@@ -54,27 +54,35 @@ class TestAVL(unittest.TestCase):
         avl.in_order(xsum, on_data=True)
         self.assertEqual(expected_result, self.result)
 
-    def test_retrieve_range_35_85(self):
+    def test_range_on_empty_avl(self):
+        first = 35
+        last = 85
+        avl = AVL()
+        result = []
+        avl.range(result.append, first, last)
+        self.assertEqual([], result)
+
+    def test_range_35_85(self):
         keys = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
         first = 35
         last = 85
         expected_result = [40, 50, 60, 70, 80]
         avl = self._create_tree_no_data(keys)
         result = []
-        avl.retrieve_range(result.append, first, last)
+        avl.range(result.append, first, last)
         self.assertEqual(expected_result, result)
 
-    def test_retrieve_range_5_70(self):
+    def test_range_5_70(self):
         keys = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
         first = 5
         last = 70
         expected_result = [10, 20, 30, 40, 50, 60, 70]
         avl = self._create_tree_no_data(keys)
         result = []
-        avl.retrieve_range(result.append, first, last)
+        avl.range(result.append, first, last)
         self.assertEqual(expected_result, result)
 
-    def test_retrieve_range_with_data_concat(self):
+    def test_range_with_data_concat(self):
         items = {10:'a', 20:'b', 30:'c', 40:'d', 50:'e', 60:'f', 70:'g', 80:'h', 90:'i', 100:'j'}
         first = 15
         last = 70
@@ -83,7 +91,7 @@ class TestAVL(unittest.TestCase):
         self.result = ''
         def concat(value):
             self.result += value
-        avl.retrieve_range(concat, first, last, retrieve_data=True)
+        avl.range(concat, first, last, on_data=True)
         self.assertEqual(expected_result, self.result)
 
     def _create_tree_no_data(self, keys):
