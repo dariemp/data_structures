@@ -146,23 +146,17 @@ class AVL(object):
             return
         if node.key == first_key:
             self._operate_on_node(node, recorder_method, retrieve_data)
-            self._retrieve_range_first_key(node.right_child, recorder_method, first_key, retrieve_data)
         elif node.key > first_key:
             self._retrieve_range_first_key(node.left_child, recorder_method, first_key, retrieve_data)
             self._operate_on_node(node, recorder_method, retrieve_data)
-            self._retrieve_range_first_key(node.right_child, recorder_method, first_key, retrieve_data)
-        elif node.key < first_key:
-            self._retrieve_range_first_key(node.right_child, recorder_method, first_key, retrieve_data)
+        self._retrieve_range_first_key(node.right_child, recorder_method, first_key, retrieve_data)
 
     def _retrieve_range_last_key(self, node, recorder_method, last_key, retrieve_data=False):
         if not node:
             return
-        if node.key == last_key:
-            self._retrieve_range_last_key(node.left_child, recorder_method, last_key, retrieve_data)
+        self._retrieve_range_last_key(node.left_child, recorder_method, last_key, retrieve_data)
+        if node.key == last_key:            
             self._operate_on_node(node, recorder_method, retrieve_data)
         elif node.key < last_key:
-            self._retrieve_range_last_key(node.left_child, recorder_method, last_key, retrieve_data)
             self._operate_on_node(node, recorder_method, retrieve_data)
             self._retrieve_range_last_key(node.right_child, recorder_method, last_key, retrieve_data)
-        elif node.key > last_key:
-            self._retrieve_range_last_key(node.left_child, recorder_method, last_key, retrieve_data)
