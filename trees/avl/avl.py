@@ -25,13 +25,13 @@ class AVL(object):
     def insert(self, key, data):
         self._root = self._search_and_insert(self._root, key, data)
 
-    def in_order(self, reduce_function, on_data=False):
-        self._in_order(self._root, reduce_function, on_data)
+    def in_order(self, recorder_method, on_data=False):
+        self._in_order(self._root, recorder_method, on_data)
 
-    def retrieve_range(self, reduce_function, first_key, last_key, retrieve_data=False):
+    def retrieve_range(self, recorder_method, first_key, last_key, retrieve_data=False):
         if first_key >= last_key:
             raise ValueError('First key must be strictly less than last key')
-        return self._retrieve_range(self._root, reduce_function, first_key, last_key, retrieve_data)
+        self._retrieve_range(self._root, recorder_method, first_key, last_key, retrieve_data)
 
     def _search_and_insert(self, node, key, data):
         if not node:
@@ -109,16 +109,16 @@ class AVL(object):
   
         return new_root
 
-    def _in_order(self, node, reduce_function, on_data=False):
+    def _in_order(self, node, recorder_method, on_data=False):
         if not node:
             return
-        self._in_order(node.left_child, reduce_function, on_data)
-        self._operate_on_node(node, reduce_function, on_data)
-        self._in_order(node.right_child, reduce_function, on_data)
+        self._in_order(node.left_child, recorder_method, on_data)
+        self._operate_on_node(node, recorder_method, on_data)
+        self._in_order(node.right_child, recorder_method, on_data)
 
-    def _operate_on_node(self, node, reduce_function, on_data=False):
+    def _operate_on_node(self, node, recorder_method, on_data=False):
         value = self._get_value_for_ordering(node, on_data)
-        reduce_function(value)
+        recorder_method(value)
 
     def _get_value_for_ordering(self, node, on_data=False):
         if on_data:
@@ -127,47 +127,47 @@ class AVL(object):
             value = node.key
         return value
 
-    def _retrieve_range(self, node, reduce_function, first_key, last_key, retrieve_data=False):
+    def _retrieve_range(self, node, recorder_method, first_key, last_key, retrieve_data=False):
         if not node:
             return
-        return self._retrieve_range_in_children(node, reduce_function, first_key, last_key, retrieve_data)
+        return self._retrieve_range_in_children(node, recorder_method, first_key, last_key, retrieve_data)
 
-    def _retrieve_range_in_children(self, node, reduce_function, first_key, last_key, retrieve_data=False):
+    def _retrieve_range_in_children(self, node, recorder_method, first_key, last_key, retrieve_data=False):
         if first_key and last_key:
-            self._retrieve_range_both_keys(node, reduce_function, first_key, last_key, retrieve_data)
+            self._retrieve_range_both_keys(node, recorder_method, first_key, last_key, retrieve_data)
         elif first_key and not last_key:
-            self._retrieve_range_first_key(node, reduce_function, first_key, retrieve_data)
+            self._retrieve_range_first_key(node, recorder_method, first_key, retrieve_data)
         elif last_key and not first_key:
-            self._retrieve_range_last_key(node, reduce_function, last_key, retrieve_data)
+            self._retrieve_range_last_key(node, recorder_method, last_key, retrieve_data)
 
-    def _retrieve_range_both_keys(self, node, reduce_function, first_key, last_key, retrieve_data=False):
+    def _retrieve_range_both_keys(self, node, recorder_method, first_key, last_key, retrieve_data=False):
         if first_key <= node.key <= last_key:
-            self._retrieve_range(node.left_child, reduce_function, first_key, None, retrieve_data)
-            self._operate_on_node(node, reduce_function, retrieve_data)
-            self._retrieve_range(node.right_child, reduce_function, None, last_key, retrieve_data)
+            self._retrieve_range(node.left_child, recorder_method, first_key, None, retrieve_data)
+            self._operate_on_node(node, recorder_method, retrieve_data)
+            self._retrieve_range(node.right_child, recorder_method, None, last_key, retrieve_data)
         elif node.key < first_key:
-            self._retrieve_range(node.right_child, reduce_function, first_key, last_key, retrieve_data)
+            self._retrieve_range(node.right_child, recorder_method, first_key, last_key, retrieve_data)
         elif node.key > last_key:
-            self._retrieve_range(node.left_child, reduce_function, first_key, last_key, retrieve_data)
+            self._retrieve_range(node.left_child, recorder_method, first_key, last_key, retrieve_data)
 
-    def _retrieve_range_first_key(self, node, reduce_function, first_key, retrieve_data=False):
+    def _retrieve_range_first_key(self, node, recorder_method, first_key, retrieve_data=False):
         if node.key == first_key:
-            self._operate_on_node(node, reduce_function, retrieve_data)
-            self._retrieve_range(node.right_child, reduce_function, first_key, None, retrieve_data)
+            self._operate_on_node(node, recorder_method, retrieve_data)
+            self._retrieve_range(node.right_child, recorder_method, first_key, None, retrieve_data)
         elif node.key > first_key:
-            self._retrieve_range(node.left_child, reduce_function, first_key, None, retrieve_data)
-            self._operate_on_node(node, reduce_function, retrieve_data)
-            self._retrieve_range(node.right_child, reduce_function, first_key, None, retrieve_data)
+            self._retrieve_range(node.left_child, recorder_method, first_key, None, retrieve_data)
+            self._operate_on_node(node, recorder_method, retrieve_data)
+            self._retrieve_range(node.right_child, recorder_method, first_key, None, retrieve_data)
         elif node.key < first_key:
-            self._retrieve_range(node.right_child, reduce_function, first_key, None, retrieve_data)
+            self._retrieve_range(node.right_child, recorder_method, first_key, None, retrieve_data)
 
-    def _retrieve_range_last_key(self, node, reduce_function, last_key, retrieve_data=False):
+    def _retrieve_range_last_key(self, node, recorder_method, last_key, retrieve_data=False):
         if node.key == last_key:
-            self._retrieve_range(node.left_child, reduce_function, None, last_key, retrieve_data)
-            self._operate_on_node(node, reduce_function, retrieve_data)
+            self._retrieve_range(node.left_child, recorder_method, None, last_key, retrieve_data)
+            self._operate_on_node(node, recorder_method, retrieve_data)
         elif node.key < last_key:
-            self._retrieve_range(node.left_child, reduce_function, None, last_key, retrieve_data)
-            self._operate_on_node(node, reduce_function, retrieve_data)
-            self._retrieve_range(node.right_child, reduce_function, None, last_key, retrieve_data)
+            self._retrieve_range(node.left_child, recorder_method, None, last_key, retrieve_data)
+            self._operate_on_node(node, recorder_method, retrieve_data)
+            self._retrieve_range(node.right_child, recorder_method, None, last_key, retrieve_data)
         elif node.key > last_key:
-            self._retrieve_range(node.left_child, reduce_function, None, last_key, retrieve_data)
+            self._retrieve_range(node.left_child, recorder_method, None, last_key, retrieve_data)
