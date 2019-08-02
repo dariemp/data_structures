@@ -1,6 +1,6 @@
 from node import Node
 
-class AVL(object):
+class AVLRange(object):
 
     def __init__(self):
         self._root = None
